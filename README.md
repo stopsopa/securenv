@@ -19,8 +19,13 @@ sudo chmod a+x /usr/local/bin/securenv
 securenv --help
 
 # Bring to docker
+
+# download linux arm
+curl -fL -o securenv \
+  https://github.com/stopsopa/securenv/releases/download/v1.1.1/securenv-linux-arm64
+
 docker run --rm \
-  -v /usr/local/bin/securenv:/usr/local/bin/securenv:ro \
+  -v "$(pwd)/securenv:/usr/local/bin/securenv:ro" \
   --entrypoint /usr/local/bin/securenv \
   gcr.io/distroless/cc-debian13:latest \
   --help
