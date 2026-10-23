@@ -9,8 +9,8 @@ if [[ ! -f "${BIN}" ]]; then
   exit 1
 fi
 
-CMD="\"${BIN}\" encrypt \"${DIR}/.env.notfound\" \"${DIR}/.env\" --password \"pwd\""
-ERR_OUT=$(eval "${CMD}" 2>&1)
+CMD="./bin/${ARCH_DIR}/securenv encrypt test/test003/.env.notfound test/test003/.env --password \"pwd\""
+ERR_OUT=$(cd "${ROOT}" && eval "${CMD}" 2>&1)
 STATUS=$?
 
 if [[ "${STATUS}" -eq 0 ]]; then

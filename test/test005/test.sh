@@ -9,8 +9,8 @@ if [[ ! -f "${BIN}" ]]; then
   exit 1
 fi
 
-CMD_ENC="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" \"${DIR}/.env\" --mask ENCODEMASK --password \"complex-p@ssw0rd!#123\""
-eval "${CMD_ENC}"
+CMD_ENC="./bin/${ARCH_DIR}/securenv encrypt test/test005/.env.tmp test/test005/.env --mask ENCODEMASK --password 'complex-p@ssw0rd!#123'"
+(cd "${ROOT}" && eval "${CMD_ENC}")
 STATUS_ENC=$?
 
 if [[ "${STATUS_ENC}" -ne 0 ]]; then
@@ -18,8 +18,8 @@ if [[ "${STATUS_ENC}" -ne 0 ]]; then
   exit 1
 fi
 
-CMD_DEC="\"${BIN}\" decrypt \"${DIR}/.env\" \"${DIR}/.env.dec\" --mask ENCODEMASK --password \"complex-p@ssw0rd!#123\""
-eval "${CMD_DEC}"
+CMD_DEC="./bin/${ARCH_DIR}/securenv decrypt test/test005/.env test/test005/.env.dec --mask ENCODEMASK --password 'complex-p@ssw0rd!#123'"
+(cd "${ROOT}" && eval "${CMD_DEC}")
 STATUS_DEC=$?
 
 if [[ "${STATUS_DEC}" -ne 0 ]]; then

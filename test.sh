@@ -18,6 +18,7 @@ PASSED=0
 FAILED=0
 
 echo "${YELLOW}=== Running securenv test suite ===${RESET}"
+echo ""
 
 for test_script in "${DIR}"/test/test*/test.sh; do
   test_dir="$(dirname "${test_script}")"
@@ -42,9 +43,9 @@ for test_script in "${DIR}"/test/test*/test.sh; do
       echo "${OUTPUT}"
     fi
   fi
+  echo ""
 done
 
-echo ""
 echo "Total tests: ${TOTAL}"
 echo "Passed: ${PASSED}"
 echo "Failed: ${FAILED}"

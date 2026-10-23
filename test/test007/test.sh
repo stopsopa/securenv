@@ -9,8 +9,8 @@ if [[ ! -f "${BIN}" ]]; then
   exit 1
 fi
 
-CMD="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" --mask ENCODEMASK --password \"pwd\" --stdout"
-OUT=$(eval "${CMD}")
+CMD="./bin/${ARCH_DIR}/securenv encrypt test/test007/.env.tmp --mask ENCODEMASK --password \"pwd\" --stdout"
+OUT=$(cd "${ROOT}" && eval "${CMD}")
 STATUS_STDOUT=$?
 
 if [[ "${STATUS_STDOUT}" -ne 0 ]]; then
@@ -23,8 +23,8 @@ if [[ "${OUT}" != *"APP_TOKEN=\"securenv:"* ]]; then
   exit 1
 fi
 
-CMD_CONFLICT="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" \"${DIR}/.env\" --mask ENCODEMASK --password \"pwd\" --stdout"
-ERR_OUT=$(eval "${CMD_CONFLICT}" 2>&1)
+CMD_CONFLICT="./bin/${ARCH_DIR}/securenv encrypt test/test007/.env.tmp test/test007/.env --mask ENCODEMASK --password \"pwd\" --stdout"
+ERR_OUT=$(cd "${ROOT}" && eval "${CMD_CONFLICT}" 2>&1)
 STATUS_CONFLICT=$?
 
 if [[ "${STATUS_CONFLICT}" -eq 0 ]]; then
