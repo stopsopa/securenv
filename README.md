@@ -17,6 +17,14 @@ sudo chmod a+x /usr/local/bin/securenv
 
 # Verify installation:
 securenv --help
+
+# Bring to docker
+docker run --rm \
+  -v /usr/local/bin/securenv:/usr/local/bin/securenv:ro \
+  --entrypoint /usr/local/bin/securenv \
+  gcr.io/distroless/cc-debian13:latest \
+  --help
+
 ```
 
 ## Usage
