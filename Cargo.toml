@@ -1,0 +1,25 @@
+[package]
+name = "securenv"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "securenv"
+path = "src/main.rs"
+
+[dependencies]
+# CLI argument parsing
+clap = { version = "4", features = ["derive"] }
+
+# AES-256-GCM encryption
+aes-gcm = "0.10"
+
+# Random number generation (for GCM nonce)
+rand = "0.8"
+
+# Base64 encoding/decoding
+base64 = "0.22"
+
+[profile.release]
+opt-level = 3
+strip = true

@@ -1,0 +1,4 @@
+[32mOK[0m  rustc: rustc 1.99.1 (58cf8f9c3 2026-10-13)
+[32mOK[0m  cargo: cargo 1.99.1 (5f94df478 2026-08-27)
+[32mOK[0m  rustfmt: rustfmt 1.10.0-stable (58cf8f9c35 2026-10-13)
+[32mOK[0m  clippy-driver: clippy 0.1.99 (58cf8f9c35 2026-10-13)
