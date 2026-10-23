@@ -40,51 +40,47 @@ Exit 0 means the local toolchain is ready for development.
 
 ## Release and Publishing Process
 
-### Workflow Overview
+### CI/CD Workflow Overview
 
-GitHub Actions pipeline `.github/workflows/rust.yml` automates building, testing, and creating releases with multi-platform binaries.
+GitHub Actions pipeline `.github/workflows/rust.yml` handles automated building, testing, and release creation:
+- **Pushing code to any branch** (or opening a PR) triggers the CI test suite (`compile.sh` and `test.sh`) across macOS arm64 and builds cross-platform binaries to ensure build stability. It does **not** create any release.
+- **Pushing a git tag** triggers the CI test suite, compiles all binaries, and generates a new **GitHub Draft Release**.
 
 ### Target Platforms Built in CI/CD
-- **macOS arm64** (`aarch64-apple-darwin`)
-- **macOS x64** (`x86_64-apple-darwin`)
-- **Linux x64** (`x86_64-unknown-linux-gnu`)
-- **Linux arm64** (`aarch64-unknown-linux-gnu`)
+- **macOS arm64** (`aarch64-apple-darwin` → `securenv-darwin-arm64`)
+- **Linux x64** (`x86_64-unknown-linux-gnu` → `securenv-linux-x64`)
+- **Linux arm64** (`aarch64-unknown-linux-gnu` → `securenv-linux-arm64`)
 
 ---
 
-## Triggering a Release
+## Creating a Release
 
-Releases are triggered strictly by git tags matching `v*.*.*` (e.g. `v0.1.0`).
+Use the helper script `tag.sh` to bump version and push tag:
 
-### Step-by-Step:
-1. Ensure all changes are committed and pushed to `main`.
-2. Run local tests:
-   ```sh
-   /bin/bash compile.sh
-   /bin/bash test.sh
-   ```
-3. Tag the release:
-   ```sh
-   git tag v0.1.0
-   ```
-4. Push the tag to GitHub:
-   ```sh
-   git push origin v0.1.0
-   ```
+```sh
+/bin/bash tag.sh patch   # or minor, major
+```
 
----
+Example session:
+```text
+Fetching git tags...
 
-## What the CI/CD Pipeline Does
+Previous tag: v0.0.4
+Mode:         patch
+New tag:      v0.0.5
 
-1. **Validation & Test Job**:
-   - Runs `compile.sh` and executes `test.sh` on macOS arm64.
-2. **Build Matrix Job**:
-   - Compiles release binaries for each supported platform.
-   - Names binaries accordingly:
-     - `securenv-darwin-arm64`
-     - `securenv-darwin-x64`
-     - `securenv-linux-x64`
-     - `securenv-linux-arm64`
-3. **GitHub Release**:
-   - Creates a new GitHub Release corresponding to the git tag.
-   - Attaches all compiled platform binaries as release assets.
+Press Enter to create and push tag 'v0.0.5', or Ctrl+C to abort...
+Enumerating objects: 9, done.
+...
+To github.com:stopsopa/securenv.git
+ * [new tag]         v0.0.5 -> v0.0.5
+Successfully created and pushed tag >v0.0.5<
+```
+
+### What happens next
+
+1. GitHub Actions detects the tag push and runs the pipeline.
+2. It compiles binaries for macOS arm64, Linux x64, and Linux arm64.
+3. Computes SHA-256 hashes for all binaries and generates dynamic `curl`, `wget`, and verification commands.
+4. Creates a **Draft Release** in GitHub Releases with binaries attached and checksum notes pre-filled.
+5. **Next step for developer**: Go to the GitHub repository **Releases** page (`https://github.com/stopsopa/securenv/releases`), review the Draft release, edit description if desired, and click **"Publish release"**.

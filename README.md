@@ -43,3 +43,7 @@ By default, encrypted values are prefixed with `securenv:` (e.g. `KEY="securenv:
 - `--prefix <PREFIX>`: Prefix marker for encrypted values (default: `securenv:`).
 - `--stdout`: Output transformed content to stdout instead of target file. Target argument must not be supplied when using this flag.
 - `--help`: Print compact usage information and exit.
+
+## dev
+
+See [DEV.md](DEV.md) for local development setup, toolchain requirements, testing, and release process.
