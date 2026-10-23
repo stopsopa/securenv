@@ -24,6 +24,8 @@ securenv --help
 curl -fL -o securenv \
   https://github.com/stopsopa/securenv/releases/download/v1.1.1/securenv-linux-arm64
 
+chmod a+x securenv
+
 docker run --rm \
   -v "$(pwd)/securenv:/usr/local/bin/securenv:ro" \
   --entrypoint /usr/local/bin/securenv \
