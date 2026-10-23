@@ -43,7 +43,7 @@ Exit 0 means the local toolchain is ready for development.
 ### CI/CD Workflow Overview
 
 GitHub Actions pipeline `.github/workflows/rust.yml` handles automated building, testing, and release creation:
-- **Pushing code to any branch** (or opening a PR) triggers the CI test suite (`compile.sh` and `test.sh`) across macOS arm64 and builds cross-platform binaries to ensure build stability. It does **not** create any release.
+- **Pushing code to any branch** (or opening a PR) triggers the CI test suite (`compile.sh` and `test.sh`) on Linux x64 (`ubuntu-latest`) and builds cross-platform binaries to ensure build stability. It does **not** create any release.
 - **Pushing a git tag** triggers the CI test suite, compiles all binaries, and generates a new **GitHub Draft Release**.
 
 ### Target Platforms Built in CI/CD

@@ -1,3 +1,5 @@
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 GRAY=$'\033[38;5;244m'
 RED=$'\033[31m'
 GREEN=$'\033[32m'
@@ -7,6 +9,14 @@ BOLD=$'\033[1m'
 RESET=$'\033[0m'
 
 MODE="${1}"
+
+if [[ -z "${MODE}" ]]; then
+  MODE="$(printf "patch\nminor\nmajor\n" | NODE_OPTIONS= node --experimental-strip-types "${DIR}/bash/file/fuzzy.ts")"
+  if [[ $? -ne 0 || -z "${MODE}" ]]; then
+    echo "${0} error: no mode selected"
+    exit 1
+  fi
+fi
 
 if [[ "${MODE}" != "patch" && "${MODE}" != "minor" && "${MODE}" != "major" ]]; then
   cat <<EEE

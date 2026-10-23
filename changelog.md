@@ -1,5 +1,9 @@
 # Release Notes
 
+### CI/CD Optimization: Switch Pipeline Test Environment to Linux x64
+
+- **CI Test Suite**: Migrated test job runner from macOS arm64 (`macos-latest`) to Linux x64 (`ubuntu-latest`) to eliminate costly runner minutes, while retaining cross-platform compilation matrix for macOS and Linux.
+
 ### Mask Regex Enhancement: `<dollar>` Placeholder & Regex Delimiter Support
 
 - **`<dollar>` Placeholder**: Added automatic substitution of `<dollar>` with `$` in mask patterns. This allows defining regex end-of-string anchors without triggering shell or `.env` variable interpolation (e.g. `$()`, `${}`).
