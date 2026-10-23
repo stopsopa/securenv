@@ -195,8 +195,10 @@ fn resolve_password(
 }
 
 /// Resolve mask regex: look in STORAGE first, then in process environment.
+/// Automatically replaces any `<dollar>` placeholder with `$` to avoid shell parameter expansion issues.
+/// Also strips leading and trailing `/` delimiters if present (e.g. `/^PATTERN$/` -> `^PATTERN$`).
 fn resolve_mask(mask_var: &str, storage: &HashMap<String, String>) -> Result<Regex, String> {
-    let pattern = storage
+    let raw_pattern = storage
         .get(mask_var)
         .cloned()
         .or_else(|| std::env::var(mask_var).ok())
@@ -204,8 +206,16 @@ fn resolve_mask(mask_var: &str, storage: &HashMap<String, String>) -> Result<Reg
             format!("mask var '{mask_var}' not found in source file or process environment")
         })?;
 
-    Regex::new(&pattern).map_err(|e| {
-        format!("invalid regex in mask var '{mask_var}' (value: '{pattern}'): {e}")
+    let replaced = raw_pattern.replace("<dollar>", "$");
+    let trimmed = replaced.trim();
+    let final_pattern = if trimmed.len() >= 2 && trimmed.starts_with('/') && trimmed.ends_with('/') {
+        &trimmed[1..trimmed.len() - 1]
+    } else {
+        trimmed
+    };
+
+    Regex::new(final_pattern).map_err(|e| {
+        format!("invalid regex in mask var '{mask_var}' (value: '{raw_pattern}'): {e}")
     })
 }
 

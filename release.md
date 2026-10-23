@@ -1,5 +1,11 @@
 # Release Notes
 
+### Mask Regex Enhancement: `<dollar>` Placeholder & Regex Delimiter Support
+
+- **`<dollar>` Placeholder**: Added automatic substitution of `<dollar>` with `$` in mask patterns. This allows defining regex end-of-string anchors without triggering shell or `.env` variable interpolation (e.g. `$()`, `${}`).
+- **Slash Delimiters**: Patterns wrapped in `/.../` slashes (e.g. `ENCODEMASK="/.../"`) have their outer delimiters automatically stripped before compiling the regular expression.
+- **Test Suite**: Added test case `test009` verifying end-to-end masking with `<dollar>` anchors and surrounding slashes.
+
 ### Security: Upgrade KDF from SHA-256 to Argon2id with Random Salts
 
 - **Issue Mitigated**: Weak key derivation. Deriving an AES-256 key with a single SHA-256 pass allowed attackers to perform fast, cheap offline dictionary and brute-force attacks against encrypted values without work factors or salt protections.

@@ -50,6 +50,16 @@ By default, encrypted values are prefixed with `securenv:` (e.g. `KEY="securenv:
 securenv encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword" --prefix "vault:"
 ```
 
+# example mask 
+
+```sh
+
+ENCODEMASK="/(^PUBLIC_|^FIREBASE_|^NODE_API_|^(PROJECT_NAME|NODE_ENV|JWT_EXPIRE_SECONDS|HOST|VITE_PROXY)<dollar>)/"
+
+```
+
+In shells and `.env` files, a literal `$` can accidentally trigger parameter expansion or variable interpolation (like `$VAR`, `$()`, or `${}`). To prevent this, securenv automatically replaces all occurrences of `<dollar>` with `$` before compiling the regex pattern. Surrounding `/.../` slashes are also stripped automatically.
+
 ## Flags & Arguments
 
 - `encrypt <source> [target]`: Encrypt matched values from source into target.
