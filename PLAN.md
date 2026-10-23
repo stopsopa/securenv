@@ -48,6 +48,8 @@ Obviously it will have to be able to decrypt in two modes too
 
 ```
 
+Target file should be always overwritten in both encrypt and decrypt mode.
+
 --mask is optional. if not provided then all env vars are subject to be encrypted/decrypted
 
 Throw clear errors (specifying env var name and raw value) when encryption or decryption unsuccessful.
@@ -58,13 +60,25 @@ When throwing errors always format them like so (with prefix indicating program 
 securenv error: <error_message>
 ```
 
+
 obviously for all error cases exit 1, for success exit 0
 
 do all in stages:
 - first let's work on the rust setup
-- then once I confirm we will move on to implementation in src/
+- then once I confirm we will move on to implementation in src/ and E2E tests in test/ directory executed by running test.sh script
+  - generate mostly end to end test cases in separate directories like test/test001/.. test/test002/.. with everything what is needed to test all major cases -> separate .env.tmp in each test/** directory
+    - if it will keep the format of the file the same as source if it will only encrypt values
+    - if it will respect ENCODEMASK 
+    - separate test for malformed ENCODEMASK
+    - if source file exist or not when called `./bin/x64 encrypt .env.fileisnotthere .env --mask ENCODEMASK --password-env "NAMEOFENVVARWITHPASSOWRD"`
 - then we will have to design .github/workflows/rust.yml to build in cicd to also publish binaries for each version on github to be available for download
+    - it will have to first build using compile.sh
+    - then it will have to run test.sh to test if the program works as intended
+    
 - prepare entire setup to build for linux (x64/arm64), mac (arm64/x64)
-
+- Then create README.md to present the project idea with how to use it in compact way. 
+    - simple explanation what program is designed for - keep it short
+    - then examples of use in README.md too
+    
 
 
