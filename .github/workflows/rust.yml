@@ -62,6 +62,9 @@ jobs:
 
       - name: Build binary
         run: |
+          if [ -n "${{ github.ref_name }}" ]; then
+            export SECURENV_VERSION="${{ github.ref_name }}"
+          fi
           if [ "${{ matrix.use_cross }}" = "true" ]; then
             cross build --release --target ${{ matrix.target }}
           else
@@ -109,17 +112,17 @@ jobs:
           
           \`\`\`bash
           # Download via curl:
-          curl -fL -o ${file} \\
+          curl -fL -o securenv \\
             ${BASE_URL}/${file}
           
           # Or download via wget:
-          wget -O ${file} \\
+          wget -O securenv \\
             ${BASE_URL}/${file}
           
           # Verify checksum:
-          echo '${hash}  ${file}' \\
+          echo '${hash}  securenv' \\
             | shasum -a 256 -c -
-          # (on Linux without shasum: echo '${hash}  ${file}' | sha256sum -c -)
+          # (on Linux without shasum: echo '${hash}  securenv' | sha256sum -c -)
           \`\`\`
           
           EOF

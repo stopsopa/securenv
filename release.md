@@ -16,3 +16,9 @@
 
 - **Issue Mitigated**: Potential low-level crypto error leakage or side-channel hints (such as specific internal AEAD or UTF-8 parser errors) in error outputs.
 - **Fix**: Unified and sanitized decryption failure messages to generic authentication error messages (`decryption failed (authentication check failed)` / `invalid base64 payload`).
+
+### CLI & Release Enhancements
+
+- **Dynamic Version Injection**: Version is now embedded into the binary at compile time via `build.rs` from git tags (or `SECURENV_VERSION` environment variable in CI).
+- **Homepage in CLI Help**: Added GitHub repository homepage (`https://github.com/stopsopa/securenv`) and build version display to `--help`.
+- **Release Documentation**: Standardized release download snippet to save binary directly as `securenv` and verify checksums against `securenv`.

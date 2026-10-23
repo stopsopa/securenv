@@ -348,9 +348,19 @@ fn handle_command(
 #[derive(Parser)]
 #[command(
     name = "securenv",
-    about = "Encrypt or decrypt selected .env file values using AES-256-GCM",
+    version = env!("SECURENV_BUILD_VERSION"),
+    about = concat!(
+        "securenv — AES-256-GCM .env value encryptor (version: ",
+        env!("SECURENV_BUILD_VERSION"),
+        ")\nHomepage: https://github.com/stopsopa/securenv"
+    ),
     long_about = concat!(
-        "securenv — AES-256-GCM .env value encryptor\n\n",
+        "securenv — AES-256-GCM .env value encryptor\n",
+        "Version:  ",
+        env!("SECURENV_BUILD_VERSION"),
+        "\nHomepage: https://github.com/stopsopa/securenv\n\n",
+        "Selectively encrypts and decrypts .env file values using AES-256-GCM and Argon2id,\n",
+        "preserving comments, whitespace, and formatting.\n\n",
         "Usage:\n",
         "  securenv encrypt <source> [target] [OPTIONS]\n",
         "  securenv decrypt <source> [target] [OPTIONS]\n\n",
@@ -360,7 +370,8 @@ fn handle_command(
         "  --password-env <VAR>  name of env var holding the password\n",
         "  --prefix <PREFIX>     encrypted value prefix (default: securenv:)\n",
         "  --stdout              write result to stdout; target must NOT be provided\n",
-        "  --help                print this help and exit",
+        "  -V, --version         print version and exit\n",
+        "  -h, --help            print this help and exit",
     )
 )]
 struct Cli {

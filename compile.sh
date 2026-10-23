@@ -7,6 +7,8 @@ RESET=$'\033[0m'
 
 echo "Building for target '${TARGET}' (arch: ${ARCH_DIR})..."
 
+export SECURENV_VERSION="dev"
+
 if [[ -n "${TARGET}" ]]; then
   cargo build --release --target "${TARGET}" --manifest-path "${DIR}/Cargo.toml"
   BUILD_STATUS=$?

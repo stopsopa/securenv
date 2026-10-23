@@ -9,8 +9,8 @@ Download the binary for your platform from the [GitHub Releases](https://github.
 Once downloaded, move the binary into your system `PATH`:
 
 ```sh
-# Example for macOS arm64 (replace binary name with your architecture):
-sudo cp securenv-darwin-arm64 /usr/local/bin/securenv
+# Move downloaded binary to /usr/local/bin:
+sudo cp securenv /usr/local/bin/securenv
 
 # Make it executable:
 sudo chmod a+x /usr/local/bin/securenv
@@ -23,23 +23,23 @@ securenv --help
 
 ```sh
 # Encrypt matched variables from .env.tmp into .env
-./bin/arm64 encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword"
+securenv encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword"
 
 # Decrypt back to plaintext
-./bin/arm64 decrypt .env .env.tmp --mask ENCODEMASK --password "supersecretpassword"
+securenv decrypt .env .env.tmp --mask ENCODEMASK --password "supersecretpassword"
 ```
 
 ### Password via Environment Variable
 
 ```sh
 export MY_KEY="supersecretpassword"
-./bin/arm64 encrypt .env.tmp .env --mask ENCODEMASK --password-env MY_KEY
+securenv encrypt .env.tmp .env --mask ENCODEMASK --password-env MY_KEY
 ```
 
 ### Output to Stdout
 
 ```sh
-./bin/arm64 encrypt .env.tmp --mask ENCODEMASK --password "supersecretpassword" --stdout
+securenv encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword" --stdout
 ```
 
 ### Custom Prefix
@@ -47,7 +47,7 @@ export MY_KEY="supersecretpassword"
 By default, encrypted values are prefixed with `securenv:` (e.g. `KEY="securenv:<base64>"`). You can override this using `--prefix`:
 
 ```sh
-./bin/arm64 encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword" --prefix "vault:"
+securenv encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword" --prefix "vault:"
 ```
 
 ## Flags & Arguments
