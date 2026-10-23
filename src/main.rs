@@ -9,6 +9,7 @@ use rand::RngCore;
 use regex::Regex;
 use sha2::{Digest, Sha256};
 use std::{collections::HashMap, fs, path::PathBuf, process};
+use zeroize::{Zeroize, Zeroizing};
 
 // ---------------------------------------------------------------------------
 // Crypto helpers
@@ -19,19 +20,21 @@ const SALT_LEN: usize = 16;
 const NONCE_LEN: usize = 12;
 
 /// Derive a 32-byte AES-256 key from a password using Argon2id and a 16-byte salt.
-fn derive_key_argon2id(password: &str, salt: &[u8]) -> Result<[u8; 32], String> {
-    let mut key = [0u8; 32];
+/// Zeroizes key buffer on drop.
+fn derive_key_argon2id(password: &str, salt: &[u8]) -> Result<Zeroizing<[u8; 32]>, String> {
+    let mut key = Zeroizing::new([0u8; 32]);
     Argon2::default()
-        .hash_password_into(password.as_bytes(), salt, &mut key)
+        .hash_password_into(password.as_bytes(), salt, &mut *key)
         .map_err(|e| format!("Argon2id key derivation error: {e}"))?;
     Ok(key)
 }
 
 /// Derive a 32-byte AES-256 key from a password using legacy SHA-256 (for backwards compatibility).
-fn derive_key_sha256(password: &str) -> [u8; 32] {
+/// Zeroizes key buffer on drop.
+fn derive_key_sha256(password: &str) -> Zeroizing<[u8; 32]> {
     let mut hasher = Sha256::new();
     hasher.update(password.as_bytes());
-    hasher.finalize().into()
+    Zeroizing::new(hasher.finalize().into())
 }
 
 /// Encrypt plaintext with AES-256-GCM using Argon2id key derivation.
@@ -42,7 +45,7 @@ fn encrypt_value(plaintext: &str, password: &str) -> Result<String, String> {
     rand::rngs::OsRng.fill_bytes(&mut salt);
 
     let key_bytes = derive_key_argon2id(password, &salt)?;
-    let key = Key::<Aes256Gcm>::from_slice(&key_bytes);
+    let key = Key::<Aes256Gcm>::from_slice(&*key_bytes);
     let cipher = Aes256Gcm::new(key);
 
     let mut nonce_bytes = [0u8; NONCE_LEN];
@@ -51,7 +54,7 @@ fn encrypt_value(plaintext: &str, password: &str) -> Result<String, String> {
 
     let ciphertext = cipher
         .encrypt(nonce, plaintext.as_bytes())
-        .map_err(|e| format!("AES-GCM encrypt error: {e}"))?;
+        .map_err(|_| "AES-GCM encryption failed".to_string())?;
 
     let mut combined = Vec::with_capacity(1 + SALT_LEN + NONCE_LEN + ciphertext.len());
     combined.push(FORMAT_VERSION_ARGON2ID);
@@ -67,7 +70,7 @@ fn encrypt_value(plaintext: &str, password: &str) -> Result<String, String> {
 fn decrypt_value(encoded: &str, password: &str) -> Result<String, String> {
     let combined = BASE64
         .decode(encoded)
-        .map_err(|e| format!("base64 decode error: {e}"))?;
+        .map_err(|_| "invalid base64 payload".to_string())?;
 
     // Check if payload starts with version byte 0x01 (Argon2id)
     if !combined.is_empty() && combined[0] == FORMAT_VERSION_ARGON2ID {
@@ -81,16 +84,18 @@ fn decrypt_value(encoded: &str, password: &str) -> Result<String, String> {
         let ciphertext = &combined[HEADER_LEN..];
 
         let key_bytes = derive_key_argon2id(password, salt)?;
-        let key = Key::<Aes256Gcm>::from_slice(&key_bytes);
+        let key = Key::<Aes256Gcm>::from_slice(&*key_bytes);
         let cipher = Aes256Gcm::new(key);
         let nonce = Nonce::from_slice(nonce_bytes);
 
-        let plaintext = cipher
+        let mut plaintext = cipher
             .decrypt(nonce, ciphertext)
-            .map_err(|e| format!("AES-GCM decrypt error (wrong password?): {e}"))?;
+            .map_err(|_| "decryption failed (authentication check failed)".to_string())?;
 
-        String::from_utf8(plaintext)
-            .map_err(|e| format!("decrypted value is not valid UTF-8: {e}"))
+        let res = String::from_utf8(plaintext.clone())
+            .map_err(|_| "decrypted value is not valid UTF-8".to_string());
+        plaintext.zeroize();
+        res
     } else {
         // Fallback: Legacy v0 payload (12-byte nonce || ciphertext) using SHA-256 key derivation
         if combined.len() < NONCE_LEN {
@@ -101,15 +106,17 @@ fn decrypt_value(encoded: &str, password: &str) -> Result<String, String> {
         let nonce = Nonce::from_slice(nonce_bytes);
 
         let key_bytes = derive_key_sha256(password);
-        let key = Key::<Aes256Gcm>::from_slice(&key_bytes);
+        let key = Key::<Aes256Gcm>::from_slice(&*key_bytes);
         let cipher = Aes256Gcm::new(key);
 
-        let plaintext = cipher
+        let mut plaintext = cipher
             .decrypt(nonce, ciphertext)
-            .map_err(|e| format!("AES-GCM decrypt error (wrong password?): {e}"))?;
+            .map_err(|_| "decryption failed (authentication check failed)".to_string())?;
 
-        String::from_utf8(plaintext)
-            .map_err(|e| format!("decrypted value is not valid UTF-8: {e}"))
+        let res = String::from_utf8(plaintext.clone())
+            .map_err(|_| "decrypted value is not valid UTF-8".to_string());
+        plaintext.zeroize();
+        res
     }
 }
 
@@ -328,8 +335,9 @@ fn handle_command(
         );
     }
 
-    let pwd = resolve_password(&password, &password_env)?;
+    let mut pwd = resolve_password(&password, &password_env)?;
     let output = process_file(&mode, &source, &mask, &pwd, &prefix)?;
+    pwd.zeroize();
     write_output(&output, &target, use_stdout)
 }
 

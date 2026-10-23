@@ -25,6 +25,10 @@ sha2 = "0.10"
 
 # Argon2id password-based key derivation function
 argon2 = "0.5"
+
+# Zeroize sensitive memory (keys, passwords) on drop
+zeroize = { version = "1.8", features = ["derive"] }
+
 # Regex for mask pattern matching
 regex = "1"
 
