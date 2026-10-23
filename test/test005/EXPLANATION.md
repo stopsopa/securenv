@@ -1,0 +1,1 @@
+Test 005 verifies roundtrip encryption and decryption: encrypting .env.tmp to .env and then decrypting .env to .env.decrypted produces values matching the original plaintext values, including variables with special characters and symbols.

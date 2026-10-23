@@ -1,0 +1,1 @@
+Test 006 verifies --password-env option for both encryption and decryption, confirming that the password is correctly retrieved from an environment variable and that clear errors are raised if the environment variable is missing or empty.
