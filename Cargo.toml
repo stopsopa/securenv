@@ -20,9 +20,11 @@ rand = "0.8"
 # Base64 encoding/decoding
 base64 = "0.22"
 
-# SHA-256 for key derivation from password
+# SHA-256 for key derivation from password (legacy fallback)
 sha2 = "0.10"
 
+# Argon2id password-based key derivation function
+argon2 = "0.5"
 # Regex for mask pattern matching
 regex = "1"
 

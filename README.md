@@ -1,6 +1,6 @@
 # securenv
 
-Compact CLI tool to selectively encrypt and decrypt `.env` values using **AES-256-GCM** while preserving file comments, whitespace, and formatting.
+Compact CLI tool to selectively encrypt and decrypt `.env` values using **AES-256-GCM** with **Argon2id** password-based key derivation (with per-value random salts and versioned payloads) while preserving file comments, whitespace, and formatting.
 
 ## Installation
 
