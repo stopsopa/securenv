@@ -94,32 +94,34 @@ jobs:
           cd release-dist
           shasum -a 256 securenv-* > SHA256SUMS.txt
           
-          echo "### SHA-256 Checksums" > ../release_notes.md
-          echo "" >> ../release_notes.md
-          echo "| Binary | SHA-256 Checksum |" >> ../release_notes.md
-          echo "| --- | --- |" >> ../release_notes.md
+          cat << 'EOF' > ../release_notes.md
+          ### SHA-256 Checksums
+          
+          | Binary | SHA-256 Checksum |
+          | --- | --- |
+          EOF
           while read -r hash file; do
             echo "| \`$file\` | \`$hash\` |" >> ../release_notes.md
           done < SHA256SUMS.txt
           
           cat << 'EOF' >> ../release_notes.md
-
-#### Verify Checksum
-- **macOS / Linux (`shasum`)**:
-  ```bash
-  shasum -a 256 <binary-name>
-  ```
-- **Linux (`sha256sum`)**:
-  ```bash
-  sha256sum <binary-name>
-  ```
-- **Verify using SHA256SUMS.txt**:
-  ```bash
-  shasum -a 256 -c SHA256SUMS.txt
-  # or on Linux:
-  sha256sum -c SHA256SUMS.txt
-  ```
-EOF
+          
+          #### Verify Checksum
+          - **macOS / Linux (`shasum`)**:
+            ```bash
+            shasum -a 256 <binary-name>
+            ```
+          - **Linux (`sha256sum`)**:
+            ```bash
+            sha256sum <binary-name>
+            ```
+          - **Verify using SHA256SUMS.txt**:
+            ```bash
+            shasum -a 256 -c SHA256SUMS.txt
+            # or on Linux:
+            sha256sum -c SHA256SUMS.txt
+            ```
+          EOF
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
