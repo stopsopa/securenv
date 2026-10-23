@@ -9,7 +9,8 @@ if [[ ! -f "${BIN}" ]]; then
   exit 1
 fi
 
-ERR_OUT=$("${BIN}" encrypt "${DIR}/.env.tmp" "${DIR}/.env" --mask ENCODEMASK --password "pwd" 2>&1)
+CMD="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" \"${DIR}/.env\" --mask ENCODEMASK --password \"pwd\""
+ERR_OUT=$(eval "${CMD}" 2>&1)
 STATUS=$?
 
 if [[ "${STATUS}" -eq 0 ]]; then
@@ -27,4 +28,5 @@ if [[ "${ERR_OUT}" != *"invalid regex in mask var"* ]]; then
   exit 1
 fi
 
+echo "  ${CMD}"
 exit 0

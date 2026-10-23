@@ -9,7 +9,8 @@ if [[ ! -f "${BIN}" ]]; then
   exit 1
 fi
 
-"${BIN}" encrypt "${DIR}/.env.tmp" "${DIR}/.env" --mask ENCODEMASK --password "pwd" --prefix "mycustomprefix:"
+CMD_ENC="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" \"${DIR}/.env\" --mask ENCODEMASK --password \"pwd\" --prefix \"mycustomprefix:\""
+eval "${CMD_ENC}"
 STATUS_ENC=$?
 
 if [[ "${STATUS_ENC}" -ne 0 ]]; then
@@ -22,7 +23,8 @@ if ! grep -q 'CUSTOM_SECRET="mycustomprefix:' "${DIR}/.env"; then
   exit 1
 fi
 
-"${BIN}" decrypt "${DIR}/.env" "${DIR}/.env.dec" --mask ENCODEMASK --password "pwd" --prefix "mycustomprefix:"
+CMD_DEC="\"${BIN}\" decrypt \"${DIR}/.env\" \"${DIR}/.env.dec\" --mask ENCODEMASK --password \"pwd\" --prefix \"mycustomprefix:\""
+eval "${CMD_DEC}"
 STATUS_DEC=$?
 
 if [[ "${STATUS_DEC}" -ne 0 ]]; then
@@ -35,4 +37,6 @@ if ! grep -q 'CUSTOM_SECRET="custom_prefix_test"' "${DIR}/.env.dec"; then
   exit 1
 fi
 
+echo "  ${CMD_ENC}"
+echo "  ${CMD_DEC}"
 exit 0

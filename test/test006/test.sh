@@ -10,7 +10,8 @@ if [[ ! -f "${BIN}" ]]; then
 fi
 
 # 1. Missing password env var
-ERR_OUT=$("${BIN}" encrypt "${DIR}/.env.tmp" "${DIR}/.env" --mask ENCODEMASK --password-env "NON_EXISTENT_VAR_12345" 2>&1)
+CMD_MISSING="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" \"${DIR}/.env\" --mask ENCODEMASK --password-env \"NON_EXISTENT_VAR_12345\""
+ERR_OUT=$(eval "${CMD_MISSING}" 2>&1)
 STATUS_MISSING=$?
 if [[ "${STATUS_MISSING}" -eq 0 ]]; then
   echo "${0} error: expected failure on missing password env var, got exit code 0"
@@ -23,7 +24,8 @@ fi
 
 # 2. Empty password env var
 export EMPTY_TEST_PWD=""
-ERR_OUT_EMPTY=$("${BIN}" encrypt "${DIR}/.env.tmp" "${DIR}/.env" --mask ENCODEMASK --password-env "EMPTY_TEST_PWD" 2>&1)
+CMD_EMPTY="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" \"${DIR}/.env\" --mask ENCODEMASK --password-env \"EMPTY_TEST_PWD\""
+ERR_OUT_EMPTY=$(eval "${CMD_EMPTY}" 2>&1)
 STATUS_EMPTY=$?
 if [[ "${STATUS_EMPTY}" -eq 0 ]]; then
   echo "${0} error: expected failure on empty password env var, got exit code 0"
@@ -36,14 +38,16 @@ fi
 
 # 3. Valid password env var
 export VALID_TEST_PWD="my_env_secret_password"
-"${BIN}" encrypt "${DIR}/.env.tmp" "${DIR}/.env" --mask ENCODEMASK --password-env "VALID_TEST_PWD"
+CMD_VALID_ENC="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" \"${DIR}/.env\" --mask ENCODEMASK --password-env \"VALID_TEST_PWD\""
+eval "${CMD_VALID_ENC}"
 STATUS_VALID_ENC=$?
 if [[ "${STATUS_VALID_ENC}" -ne 0 ]]; then
   echo "${0} error: encrypt with --password-env failed with exit code >${STATUS_VALID_ENC}<"
   exit 1
 fi
 
-"${BIN}" decrypt "${DIR}/.env" "${DIR}/.env.dec" --mask ENCODEMASK --password-env "VALID_TEST_PWD"
+CMD_VALID_DEC="\"${BIN}\" decrypt \"${DIR}/.env\" \"${DIR}/.env.dec\" --mask ENCODEMASK --password-env \"VALID_TEST_PWD\""
+eval "${CMD_VALID_DEC}"
 STATUS_VALID_DEC=$?
 if [[ "${STATUS_VALID_DEC}" -ne 0 ]]; then
   echo "${0} error: decrypt with --password-env failed with exit code >${STATUS_VALID_DEC}<"
@@ -55,4 +59,7 @@ if ! grep -q 'SECRET_DATA="password_env_secret"' "${DIR}/.env.dec"; then
   exit 1
 fi
 
+echo "  export VALID_TEST_PWD=\"my_env_secret_password\""
+echo "  ${CMD_VALID_ENC}"
+echo "  ${CMD_VALID_DEC}"
 exit 0

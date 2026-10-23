@@ -32,6 +32,9 @@ for test_script in "${DIR}"/test/test*/test.sh; do
   if [[ "${STATUS}" -eq 0 ]]; then
     PASSED=$((PASSED + 1))
     echo "${GREEN}PASS${RESET}"
+    if [[ -n "${OUTPUT}" ]]; then
+      echo "${OUTPUT}"
+    fi
   else
     FAILED=$((FAILED + 1))
     echo "${RED}FAIL (exit code ${STATUS})${RESET}"

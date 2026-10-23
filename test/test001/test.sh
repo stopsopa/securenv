@@ -9,7 +9,8 @@ if [[ ! -f "${BIN}" ]]; then
   exit 1
 fi
 
-"${BIN}" encrypt "${DIR}/.env.tmp" "${DIR}/.env" --mask ENCODEMASK --password "testpwd001"
+CMD="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" \"${DIR}/.env\" --mask ENCODEMASK --password \"testpwd001\""
+eval "${CMD}"
 STATUS=$?
 
 if [[ "${STATUS}" -ne 0 ]]; then
@@ -52,4 +53,5 @@ if ! grep -q 'APP_ENV=development' "${DIR}/.env"; then
   exit 1
 fi
 
+echo "  ${CMD}"
 exit 0

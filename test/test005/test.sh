@@ -9,7 +9,8 @@ if [[ ! -f "${BIN}" ]]; then
   exit 1
 fi
 
-"${BIN}" encrypt "${DIR}/.env.tmp" "${DIR}/.env" --mask ENCODEMASK --password "complex-p@ssw0rd!#123"
+CMD_ENC="\"${BIN}\" encrypt \"${DIR}/.env.tmp\" \"${DIR}/.env\" --mask ENCODEMASK --password \"complex-p@ssw0rd!#123\""
+eval "${CMD_ENC}"
 STATUS_ENC=$?
 
 if [[ "${STATUS_ENC}" -ne 0 ]]; then
@@ -17,7 +18,8 @@ if [[ "${STATUS_ENC}" -ne 0 ]]; then
   exit 1
 fi
 
-"${BIN}" decrypt "${DIR}/.env" "${DIR}/.env.dec" --mask ENCODEMASK --password "complex-p@ssw0rd!#123"
+CMD_DEC="\"${BIN}\" decrypt \"${DIR}/.env\" \"${DIR}/.env.dec\" --mask ENCODEMASK --password \"complex-p@ssw0rd!#123\""
+eval "${CMD_DEC}"
 STATUS_DEC=$?
 
 if [[ "${STATUS_DEC}" -ne 0 ]]; then
@@ -51,4 +53,6 @@ if ! grep -F -q 'PUBLIC_NAME="test-app"' "${DIR}/.env.dec"; then
   exit 1
 fi
 
+echo "  ${CMD_ENC}"
+echo "  ${CMD_DEC}"
 exit 0
