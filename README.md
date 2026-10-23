@@ -2,6 +2,23 @@
 
 Compact CLI tool to selectively encrypt and decrypt `.env` values using **AES-256-GCM** while preserving file comments, whitespace, and formatting.
 
+## Installation
+
+Download the binary for your platform from the [GitHub Releases](https://github.com/stopsopa/securenv/releases) page. Each release contains direct `curl` / `wget` commands and SHA-256 checksums for each architecture.
+
+Once downloaded, move the binary into your system `PATH`:
+
+```sh
+# Example for macOS arm64 (replace binary name with your architecture):
+sudo cp securenv-darwin-arm64 /usr/local/bin/securenv
+
+# Make it executable:
+sudo chmod a+x /usr/local/bin/securenv
+
+# Verify installation:
+securenv --help
+```
+
 ## Usage
 
 ```sh

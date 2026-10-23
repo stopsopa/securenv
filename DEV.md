@@ -82,5 +82,4 @@ Successfully created and pushed tag >v0.0.5<
 1. GitHub Actions detects the tag push and runs the pipeline.
 2. It compiles binaries for macOS arm64, Linux x64, and Linux arm64.
 3. Computes SHA-256 hashes for all binaries and generates dynamic `curl`, `wget`, and verification commands.
-4. Creates a **Draft Release** in GitHub Releases with binaries attached and checksum notes pre-filled.
-5. **Next step for developer**: Go to the GitHub repository **Releases** page (`https://github.com/stopsopa/securenv/releases`), review the Draft release, edit description if desired, and click **"Publish release"**.
+4. Creates and publishes the GitHub Release with attached platform binaries and generated checksum verification notes.
