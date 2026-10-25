@@ -25,9 +25,16 @@ then it will iterate over STORAGE and using that regex it will filter out env va
 Then it will try to create .env file and keep entire format like in .env.tmp
 
 It will only change values for env vars pointed out by regex: replace original values with encrypted form.
-Rest of the file (comments, blank lines, non-matched vars) must be copied as-is to the target file.
+Rest of the file (regular `#` comments, blank lines, non-matched vars) must be copied as-is to the target file.
 
 When decrypting: swap encrypted values with decrypted values in the target file, rest copied as-is.
+
+**`##` comment encryption** — in addition to matched env vars, encrypt lines starting with `##`:
+- Encrypt any line starting with `##` (after optional leading spaces/tabs) that contains at least one non-whitespace character after `##`.
+- Keep `##` and any whitespace between `##` and the first non-whitespace character in plaintext; encrypt only the payload after that whitespace. Format: `##<original_spaces><prefix><base64>`.
+- Extra `#` immediately after `##` (e.g. `###`) — treat extra `#` as payload (encrypt it).
+- Lines with only `##` + spaces/tabs — leave untouched in both encrypt and decrypt.
+- Decrypt restores original line exactly (prefix kept, payload decrypted back).
 
 before you start implementation we have to also think about how we will encode these env vars.
 
@@ -98,6 +105,7 @@ do all in stages:
     - if source file exist or not when called `./bin/arm64 encrypt .env.fileisnotthere .env --mask ENCODEMASK --password-env "NAMEOFENVVARWITHPASSOWRD"`
     - if target file's parent directory does not exist
     - roundtrip test: encrypt → decrypt → verify decrypted values match original plaintext values
+    - `##` comment encryption: ENCODEMASK non-empty, vars matching/outside mask, all `##` variants (no space, multiple spaces, tabs, leading spaces/tabs before `##`, `###`/`####`, whitespace-only ignored lines), round-trip
 - then we will have to design .github/workflows/rust.yml to build in cicd
   - it will have to first build using compile.sh
   - cross-compilation for Linux (x64/arm64) and Mac (arm64/x64) is needed only in the pipeline - use whatever toolchain/docker approach is appropriate for that

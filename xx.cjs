@@ -39,6 +39,20 @@ IFS= read -r -n1 k 2>/dev/null||IFS= read -r k;stty "$old"
 
 module.exports = (setup) => {
   return {
+    help: {
+      command: `
+        
+cat <<EEE
+
+  🐙 GitHub: $(git ls-remote --get-url origin | awk '{\$1=\$1};1' | tr -d '\\n' | sed -E 's/git@github\\.com:([^/]+)\\/(.+)\\.git/https:\\/\\/github.com\\/\\1\\/\\2/g')
+
+EEE
+
+      `,
+      description: "Status of all things",
+      source: false,
+      confirm: false,
+    },
     [`validateenv`]: {
       command: `
 set -e      

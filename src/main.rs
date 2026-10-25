@@ -220,6 +220,71 @@ fn resolve_mask(mask_var: &str, storage: &HashMap<String, String>) -> Result<Reg
 }
 
 // ---------------------------------------------------------------------------
+// ## comment encryption helpers
+// ---------------------------------------------------------------------------
+
+/// Represents a parsed `##` comment line broken into its parts.
+struct DoubleHashComment<'a> {
+    /// Everything up to and including `##` plus any leading whitespace before
+    /// the first non-whitespace payload character, e.g. `"  ## "`.
+    prefix: &'a str,
+    /// The non-whitespace payload that should be encrypted/decrypted.
+    payload: &'a str,
+}
+
+/// Try to parse a line as an encryptable `##` comment.
+///
+/// Rules:
+/// - Line (after stripping leading spaces/tabs) must start with `##`.
+/// - There must be at least one non-whitespace character after `##`
+///   (possibly separated by spaces/tabs). Lines that are only `##` + spaces
+///   are ignored (returned as `None`).
+/// - Extra `#` characters immediately after `##` (no whitespace separator)
+///   are treated as part of the payload to encrypt.
+///
+/// Returns `Some(DoubleHashComment)` when the line should be encrypted/decrypted,
+/// `None` when the line must be left untouched.
+fn parse_double_hash_comment(line: &str) -> Option<DoubleHashComment<'_>> {
+    // Find where the line content starts (skip leading spaces/tabs)
+    let content_start = line
+        .char_indices()
+        .find(|(_, c)| *c != ' ' && *c != '\t')
+        .map(|(i, _)| i)
+        .unwrap_or(line.len());
+
+    let rest = &line[content_start..];
+
+    // Must start with exactly `##`
+    if !rest.starts_with("##") {
+        return None;
+    }
+
+    // Everything after `##`
+    let after_hashes = &rest[2..];
+
+    // Find the first non-whitespace character in `after_hashes` — that is the
+    // start of the payload. The whitespace between `##` and the payload is
+    // kept in plaintext as part of the prefix.
+    let payload_start_in_after = after_hashes
+        .char_indices()
+        .find(|(_, c)| *c != ' ' && *c != '\t')
+        .map(|(i, _)| i);
+
+    let payload_start_in_after = match payload_start_in_after {
+        // No non-whitespace content → ignore this line
+        None => return None,
+        Some(i) => i,
+    };
+
+    // `prefix` = everything from line start up to (but not including) the payload
+    let prefix_len = content_start + 2 + payload_start_in_after;
+    let prefix = &line[..prefix_len];
+    let payload = &line[prefix_len..];
+
+    Some(DoubleHashComment { prefix, payload })
+}
+
+// ---------------------------------------------------------------------------
 // Core processing
 // ---------------------------------------------------------------------------
 
@@ -228,7 +293,8 @@ enum Mode {
     Decrypt,
 }
 
-/// Process an env file: encrypt or decrypt values matched by the mask regex.
+/// Process an env file: encrypt or decrypt values matched by the mask regex,
+/// and also encrypt/decrypt `##` comment lines that contain non-whitespace content.
 /// Returns the transformed file content as a String, preserving all formatting.
 fn process_file(
     mode: &Mode,
@@ -250,6 +316,36 @@ fn process_file(
     let mut output_lines: Vec<String> = Vec::new();
 
     for line in content.lines() {
+        // --- `##` comment lines: always processed regardless of mask ---
+        if let Some(dh) = parse_double_hash_comment(line) {
+            let new_line = match mode {
+                Mode::Encrypt => {
+                    let b64 = encrypt_value(dh.payload, password).map_err(|e| {
+                        format!("encrypt failed for ## comment (payload: '{}'): {e}", dh.payload)
+                    })?;
+                    format!("{}{}{}", dh.prefix, prefix, b64)
+                }
+                Mode::Decrypt => {
+                    if dh.payload.starts_with(prefix) {
+                        let encoded = &dh.payload[prefix.len()..];
+                        let plain = decrypt_value(encoded, password).map_err(|e| {
+                            format!(
+                                "decrypt failed for ## comment (payload: '{}'): {e}",
+                                dh.payload
+                            )
+                        })?;
+                        format!("{}{}", dh.prefix, plain)
+                    } else {
+                        // Payload does not carry the prefix – copy line unchanged
+                        line.to_string()
+                    }
+                }
+            };
+            output_lines.push(new_line);
+            continue;
+        }
+
+        // --- env var assignment lines ---
         if let Some((key_name, raw_value)) = parse_assignment(line) {
             let should_transform = match &regex_opt {
                 Some(re) => re.is_match(key_name),
@@ -287,7 +383,7 @@ fn process_file(
                 output_lines.push(line.to_string());
             }
         } else {
-            // Comment or blank line – copy unchanged
+            // Single-# comment or blank line – copy unchanged
             output_lines.push(line.to_string());
         }
     }

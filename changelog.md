@@ -1,5 +1,12 @@
 # Release Notes
 
+### Feature: `##` Comment Encryption in `.env` Files
+
+- Lines starting with `##` (with optional leading spaces/tabs) that have non-whitespace content are now encrypted alongside matched env vars.
+- `##` marker and any whitespace before the payload stay plaintext; only payload is encrypted. Format: `##<spaces><prefix><base64>`.
+- Extra `#` immediately after `##` (e.g. `###`) is treated as payload. Lines with only `##` + whitespace are ignored.
+- Round-trip safe. Added `test010` covering all variants and full diff round-trip.
+
 ### CI/CD Optimization: Switch Pipeline Test Environment to Linux x64
 
 - **CI Test Suite**: Migrated test job runner from macOS arm64 (`macos-latest`) to Linux x64 (`ubuntu-latest`) to eliminate costly runner minutes, while retaining cross-platform compilation matrix for macOS and Linux.
