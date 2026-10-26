@@ -22,7 +22,7 @@ securenv --help
 
 # download linux arm
 curl -fL -o securenv \
-  https://github.com/stopsopa/securenv/releases/download/v1.1.1/securenv-linux-arm64
+  https://github.com/stopsopa/securenv/releases/download/v1.2.0/securenv-linux-arm64
 
 chmod a+x securenv
 
