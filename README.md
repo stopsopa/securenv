@@ -86,6 +86,27 @@ In shells and `.env` files, a literal `$` can accidentally trigger parameter exp
 - `--stdout`: Output transformed content to stdout instead of target file. Target argument must not be supplied when using this flag.
 - `--help`: Print compact usage information and exit.
 
+## `##` Comment Encryption
+
+Lines starting with `##` (optionally preceded by spaces/tabs) that contain non-whitespace content are encrypted and decrypted alongside matched env vars. The `##` marker and any whitespace before the payload stay in plaintext; only the payload is encrypted.
+
+```sh
+## this comment will be encrypted
+##this too (no space)
+##  and this (two spaces)
+  ## leading indent preserved
+### extra # treated as payload too
+
+##         ← only whitespace after ## → left untouched
+# regular single-hash comment   → always left untouched
+```
+
+Encrypted form keeps the exact prefix so the file remains valid:
+
+```sh
+## securenv:<base64>
+```
+
 ## dev
 
 See [DEV.md](DEV.md) for local development setup, toolchain requirements, testing, and release process.
