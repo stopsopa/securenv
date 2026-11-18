@@ -1,0 +1,1 @@
+Test 011 verifies verbatim right-hand side handling: single quotes, inline comments, inner quotes, `export KEY=`, indentation and multi-line quoted values are all encrypted fully (no plaintext line leaks) and decrypt restores the file byte for byte. Also verifies decrypted target file gets `0600` permissions and that a never-closed quote produces a clear error.

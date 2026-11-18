@@ -1,0 +1,1 @@
+Test 012 verifies that encrypted value is bound to its variable name: swapping encrypted values between two variables in the encrypted file makes decrypt fail with a clear error, while the untouched file decrypts fine.

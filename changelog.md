@@ -1,5 +1,22 @@
 # Release Notes
 
+### Security: Payload Format v2, Verbatim Values, Multi-line Values
+
+- **Breaking**: files encrypted by this version (payload version byte `0x02`) cannot be decrypted by older binaries. Files encrypted by older versions (v1 Argon2id, legacy v0 SHA-256) still decrypt.
+- **Multi-line values**: quoted value spanning multiple lines (PEM key, JSON) is now encrypted as a whole. Before only the first line was encrypted and the rest stayed in plaintext. Never-closed quote is now a clear error.
+- **`export KEY=value`**: mask is matched against `KEY` (before it was matched against `export KEY`, so masked vars were silently left unencrypted). `export ` prefix and indentation are preserved.
+- **Verbatim right-hand side**: everything after `=` (quote style, inline comment, whitespace) is encrypted and restored byte for byte. Before decrypt always produced `KEY="value"`, which changed meaning of single-quoted, unquoted and inline-commented values.
+- **Value bound to variable name**: variable name is AES-GCM associated data. Swapping encrypted values between variables (or moving a value under another name) makes decrypt fail. `##` comments are bound to a fixed `##` label.
+- **Legacy detection fix**: legacy v0 payload whose random nonce started with byte `0x01` (1 in 256) was treated as Argon2id and could not be decrypted. Legacy is now tried as fallback.
+- **Legacy warning**: decrypting legacy SHA-256 payload prints one warning on stderr asking to encrypt the file again.
+- **File permissions**: decrypted target file is written with `0600` permissions.
+- **No plaintext in errors**: encrypt errors no longer print the raw plaintext value.
+- **Line endings**: CRLF line endings are preserved.
+- **Zeroize**: password and output buffer are wiped also when command ends with error.
+- **Help**: `--help` marks `--password-env` as recommended and warns that `--password` is visible in `ps` / shell history (in red when stdout is an interactive terminal, plain when piped or `NO_COLOR` is set).
+- **README**: `--password-env` is the documented default, fixed `--stdout` example and stale SHA-256 mention.
+- **Test Suite**: added `test011` (verbatim values, `export`, multi-line, permissions, unterminated quote) and `test012` (swapped values rejected).
+
 ### Feature: `##` Comment Encryption in `.env` Files
 
 - Lines starting with `##` (with optional leading spaces/tabs) that have non-whitespace content are now encrypted alongside matched env vars.

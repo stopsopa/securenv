@@ -69,7 +69,8 @@ set -e
     },
     [`test`]: {
       command: `
-set -e      
+set -e
+/bin/bash compile.sh
 /bin/bash test.sh
 `,
       confirm: false,

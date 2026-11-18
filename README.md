@@ -36,25 +36,30 @@ docker run --rm \
 
 ## Usage
 
-```sh
-# Encrypt matched variables from .env.tmp into .env
-securenv encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword"
-
-# Decrypt back to plaintext
-securenv decrypt .env .env.tmp --mask ENCODEMASK --password "supersecretpassword"
-```
-
-### Password via Environment Variable
+Recommended: pass the password through an environment variable.
 
 ```sh
 export MY_KEY="supersecretpassword"
+
+# Encrypt matched variables from .env.tmp into .env
 securenv encrypt .env.tmp .env --mask ENCODEMASK --password-env MY_KEY
+
+# Decrypt back to plaintext (target file is created with 0600 permissions)
+securenv decrypt .env .env.tmp --mask ENCODEMASK --password-env MY_KEY
+```
+
+### Password as Argument (not recommended)
+
+`--password` exposes the password in `ps` output and shell history. Use it only for local experiments.
+
+```sh
+securenv encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword"
 ```
 
 ### Output to Stdout
 
 ```sh
-securenv encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword" --stdout
+securenv encrypt .env.tmp --mask ENCODEMASK --password-env MY_KEY --stdout
 ```
 
 ### Custom Prefix
@@ -62,8 +67,25 @@ securenv encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword
 By default, encrypted values are prefixed with `securenv:` (e.g. `KEY="securenv:<base64>"`). You can override this using `--prefix`:
 
 ```sh
-securenv encrypt .env.tmp .env --mask ENCODEMASK --password "supersecretpassword" --prefix "vault:"
+securenv encrypt .env.tmp .env --mask ENCODEMASK --password-env MY_KEY --prefix "vault:"
 ```
+
+## What Exactly Is Encrypted
+
+Everything after `=` is encrypted verbatim (quotes, inline comment, whitespace) and restored byte for byte on decrypt:
+
+```sh
+KEY='single $quoted'          # quote style restored exactly
+KEY=value # inline comment    # inline comment is encrypted together with value
+export KEY="value"            # `export ` stays, mask is matched against KEY
+KEY="-----BEGIN PRIVATE KEY-----
+multi-line quoted values are encrypted as a whole
+-----END PRIVATE KEY-----"
+```
+
+- A quoted value that is never closed is an error (nothing is written).
+- Each encrypted value is bound to its variable name: moving encrypted value under a different variable name makes decrypt fail. To rename a variable decrypt first, rename, encrypt again.
+- The mask selects what gets encrypted. A variable not matching the mask stays in plaintext — check the output after adding new secrets.
 
 # example mask 
 
@@ -80,8 +102,8 @@ In shells and `.env` files, a literal `$` can accidentally trigger parameter exp
 - `encrypt <source> [target]`: Encrypt matched values from source into target.
 - `decrypt <source> [target]`: Decrypt matched values from source into target.
 - `--mask <VAR>`: Name of the variable (in file or process environment) containing a regex pattern. Only variables matching this regex have their values transformed. If omitted, all variables are processed.
-- `--password <PWD>`: Password string for encryption/decryption key derivation (AES-256-GCM via SHA-256).
-- `--password-env <VAR>`: Name of an environment variable containing the password.
+- `--password-env <VAR>`: Name of an environment variable containing the password (recommended).
+- `--password <PWD>`: Password string for encryption/decryption key derivation (AES-256-GCM via Argon2id). Visible in `ps` and shell history.
 - `--prefix <PREFIX>`: Prefix marker for encrypted values (default: `securenv:`).
 - `--stdout`: Output transformed content to stdout instead of target file. Target argument must not be supplied when using this flag.
 - `--help`: Print compact usage information and exit.
